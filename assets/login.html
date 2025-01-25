@@ -270,6 +270,9 @@
                     if (response.data.message === 'Login successful') {
                         window.localStorage.setItem('token', response.data.token);
                         window.localStorage.setItem('user_id', response.data.user_id);
+
+                        // set cookie
+                        document.cookie = `token=${response.data.token}; path=/`;
                         window.location.href = '/dashboard';
                     } else {
                         alert(response.data.message);

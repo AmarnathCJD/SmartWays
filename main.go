@@ -5,6 +5,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	"main/modules"
 )
 
 func main() {
@@ -17,8 +19,8 @@ func main() {
 	})
 
 	// API routes
-	r.Post("/api/login", LoginHandler)
-	r.Post("/api/register", RegisterHandler)
+	r.Post("/api/login", modules.LoginHandler)
+	r.Post("/api/register", modules.RegisterHandler)
 
 	// HTML routes
 	r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +30,7 @@ func main() {
 		http.ServeFile(w, r, "assets/register.html")
 	})
 
-	r.Handle("/", TokenCheck(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	r.Handle("/", modules.TokenCheck(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.Context().Value("user")
 		w.Write([]byte("Welcome to SmartWays"))
 	})))

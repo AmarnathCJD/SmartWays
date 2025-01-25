@@ -1,15 +1,20 @@
-package main
+package modules
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
 func TokenCheck(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
+		cookies := r.Cookies()
+		token := ""
+		for _, cookie := range cookies {
+			if cookie.Name == "token" {
+				token = cookie.Value
+			}
+		}
 		if token == "" {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 		}
@@ -46,11 +51,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	userToken, _ := user.GenUserToken()
 
-	writeJSON(w, map[string]interface{}{
-		"message": "Login successful",
-		"token":   userToken,
-		"user_id": user.UserID,
-	})
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Set-Cookie", fmt.Sprintf("token=%s", userToken))
+
+	w.Write([]byte(`{"message": "Login successful", "token": "` + userToken + `", "user_id": "` + user.UserID + `"}`))
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,12 +80,4 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, map[string]interface{}{
-		"message": "User created successfully",
-	})
-}
-
-func writeJSON(w http.ResponseWriter, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
 }
