@@ -42,5 +42,6 @@ func main() {
 		w.Write([]byte("Welcome to SmartWays"))
 	})))
 
+	r.HandleFunc("/maps", modules.GmapsProxyHandler)
 	http.ListenAndServe(":3000", r)
 }

@@ -3,7 +3,9 @@ package modules
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 )
 
 func TokenCheck(next http.Handler) http.Handler {
@@ -79,5 +81,29 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
 
+func GmapsProxyHandler(w http.ResponseWriter, r *http.Request) {
+	req, err := http.NewRequest("GET", "https://maps.googleapis.com/maps/api/js?key="+os.Getenv("GMAPS_API_KEY"), nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	req.Header = r.Header
+	req.Header.Set("X-Forwarded-For", r.RemoteAddr)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	defer resp.Body.Close()
+	for k, v := range resp.Header {
+		w.Header()[k] = v
+	}
+
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
 }
