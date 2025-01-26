@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -29,6 +30,12 @@ func main() {
 	r.Get("/register", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "assets/register.html")
 	})
+
+	r.Handle("/dashboard", modules.TokenCheck(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value("user").(modules.Auth)
+		dashboard := template.Must(template.ParseFiles("assets/dashboard.html"))
+		dashboard.Execute(w, user)
+	})))
 
 	r.Handle("/", modules.TokenCheck(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.Context().Value("user")

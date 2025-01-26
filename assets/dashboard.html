@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Smart Ways</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjjIn17l-6uyNlZnjOEsZNnzoLGeIWCi0"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --primary: #ff3333;
+            --primary-hover: #ff4444;
+            --bg-dark: #121212;
+            --bg-card: #1a1a1a;
+            --bg-elevated: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: rgba(26, 26, 26, 0.98);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.5s ease-out;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.1rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .logo svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--primary);
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            background: var(--bg-elevated);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-container svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 51, 51, 0.15);
+        }
+
+        .search-container input:focus+svg {
+            color: var(--primary);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            animation: fadeIn 0.7s ease-out;
+        }
+
+        .user-profile:hover {
+            background: var(--bg-elevated);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-info {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .user-info {
+                display: block;
+            }
+
+            .user-name {
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            .user-role {
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+            }
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 64px);
+            position: relative;
+        }
+
+        .map-container {
+            flex: 1;
+            background: var(--bg-card);
+            position: relative;
+            padding: 1rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+        }
+
+        .info-panel {
+            width: 280px;
+            background: rgba(26, 26, 26, 0.98);
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            overflow-y: auto;
+        }
+
+        .info-section {
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: fadeIn 0.5s ease-out;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .info-section h2 {
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .info-section h2 svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.8rem;
+            padding: 0.4rem;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .info-item svg {
+            width: 12px;
+            height: 12px;
+            color: var(--text-secondary);
+        }
+
+        .control-panel {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(26, 26, 26, 0.98);
+            padding: 0.75rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: slideUp 0.5s ease-out;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.5rem 1rem;
+            }
+
+            .info-panel {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 260px;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                border-left: none;
+                padding: 0.75rem;
+            }
+
+            .control-panel {
+                bottom: calc(260px + 1rem);
+            }
+
+            .info-section {
+                padding: 0.6rem;
+                margin-bottom: 0.6rem;
+            }
+
+            .info-item {
+                padding: 0.35rem;
+            }
+        }
+
+        .control-btn {
+            padding: 0.5rem;
+            background: var(--bg-elevated);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            min-width: 42px;
+            justify-content: center;
+        }
+
+        .control-btn span {
+            display: none;
+        }
+
+        @media (min-width: 640px) {
+            .control-btn {
+                padding: 0.5rem 1rem;
+            }
+
+            .control-btn span {
+                display: inline;
+            }
+        }
+
+        .control-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 51, 51, 0.2);
+        }
+
+        .control-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            position: relative;
+        }
+
+        .status::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 50%;
+            background: inherit;
+            opacity: 0.4;
+            animation: pulse 2s ease-out infinite;
+        }
+
+        .status.green {
+            background: #4CAF50;
+        }
+
+        .status.red {
+            background: #f44336;
+        }
+
+        .status.yellow {
+            background: #FFC107;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.4;
+            }
+
+            70% {
+                transform: scale(2);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, 100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.5rem 1rem;
+            }
+
+            .info-panel {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 300px;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                border-left: none;
+            }
+
+            .control-panel {
+                bottom: 320px;
+            }
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(26, 26, 26, 0.98);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12" y2="8" />
+            </svg>
+            <span>Smart Ways</span>
+        </div>
+        <div class="search-container">
+            <input type="text" placeholder="Search locations or routes...">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+        </div>
+        <div class="user-profile">
+            <div class="user-avatar">SW</div>
+            <div class="user-info">
+                <div class="user-name"></div>
+                <div class="user-role"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="control-panel">
+                <button class="control-btn" data-tooltip="Stop sharing location">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span>Stop</span>
+                </button>
+                <button class="control-btn" data-tooltip="Find better routes">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                    </svg>
+                    <span>Routes</span>
+                </button>
+                <button class="control-btn" data-tooltip="Report an issue">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                        <line x1="4" y1="22" x2="4" y2="15" />
+                    </svg>
+                    <span>Report</span>
+                </button>
+                <button class="control-btn" data-tooltip="Open settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                    <span>Settings</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-section">
+                <h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    Current Location
+                </h2>
+                <div class="info-item">
+                    <span>123 Main Street, City</span>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                    </svg>
+                    Nearest Junction
+                </h2>
+                <div class="info-item">Central Junction</div>
+                <div class="info-item">2 mins away</div>
+            </div>
+
+            <div class="info-section">
+                <h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12" y2="8" />
+                    </svg>
+                    Traffic Status
+                </h2>
+                <div class="info-item">
+                    <span class="status green"></span>
+                    <span id="signal-1">North: Green (45s)</span>
+                </div>
+                <div class="info-item">
+                    <span class="status red"></span>
+                    <span id="signal-2">South: Red (30s)</span>
+                </div>
+                <div class="info-item">
+                    <span class="status yellow"></span>
+                    <span id="signal-3">East: Yellow (5s)</span>
+                </div>
+                <div class="info-item">
+                    <span class="status red"></span>
+                    <span id="signal-4">West: Red (25s)</span>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                    </svg>
+                    Suggested Routes
+                </h2>
+                <div class="info-item">Route 1: Via Highway (Fastest)</div>
+                <div class="info-item">Route 2: Via Main Street</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip"></div>
+
+    <script>
+        const userName = `{{.Name}}`;
+        const userRole = `{{.Type}}`;
+        document.querySelector('.user-name').textContent = userName;
+        document.querySelector('.user-role').textContent = userRole == 3 ? 'User' : userRole == 2 ? 'Emergency Services' : 'Admin';
+
+        const signalTimes = [45, 30, 5, 25];
+        const signals = document.querySelectorAll('.info-item span[id^="signal-"]');
+        signals.forEach((signal, index) => {
+            signal.textContent = signal.textContent.replace(/\d+s/, `${signalTimes[index]}s`);
+        });
+
+        const signalColors = document.querySelectorAll('.status');
+
+        setInterval(() => {
+            signalTimes.forEach((time, index) => {
+                if (time === 0) {
+                    signalTimes[index] = index % 3 === 0 ? 45 : 30;
+                } else {
+                    signalTimes[index]--;
+                }
+            });
+
+            signals.forEach((signal, index) => {
+                signal.textContent = signal.textContent.replace(/\d+s/, `${signalTimes[index]}s`);
+            });
+
+            signalColors.forEach((signal, index) => {
+                if (signalTimes[index] > 30) {
+                    signal.className = 'status green';
+                } else if (signalTimes[index] > 10) {
+                    signal.className = 'status red';
+                } else {
+                    signal.className = 'status yellow';
+                }
+            });
+        }, 1000);
+
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -34.397, lng: 150.644 },
+                zoom: 14,
+                disableDefaultUI: true,
+                fullscreenControl: true,
+                styles: [
+                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+                    {
+                        featureType: "administrative.locality",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "geometry",
+                        stylers: [{ color: "#38414e" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#212a37" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#9ca5b3" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "geometry",
+                        stylers: [{ color: "#17263c" }],
+                    }
+                ]
+            });
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+                        map.setCenter(pos);
+                        new google.maps.Marker({
+                            position: pos,
+                            map: map,
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 10,
+                                fillColor: "#ff3333",
+                                fillOpacity: 1,
+                                strokeWeight: 2,
+                                strokeColor: "#ffffff",
+                            },
+                        });
+                    },
+                    () => {
+                        console.log("Error: The Geolocation service failed.");
+                    }
+                );
+            }
+        }
+
+        window.onload = initMap;
+
+        const tooltip = document.querySelector('.tooltip');
+        document.querySelectorAll('[data-tooltip]').forEach(element => {
+            element.addEventListener('mouseenter', e => {
+                const rect = e.target.getBoundingClientRect();
+                tooltip.textContent = e.target.dataset.tooltip;
+                tooltip.style.top = `${rect.top - 40}px`;
+                tooltip.style.left = `${rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`;
+                tooltip.style.opacity = '1';
+            });
+
+            element.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+            });
+        });
+
+        document.querySelectorAll('.control-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 100);
+
+                const action = this.querySelector('span').textContent.trim();
+                switch (action) {
+                    case 'Stop':
+                        console.log('Location sharing stopped');
+                        break;
+                    case 'Routes':
+                        console.log('Calculating better routes');
+                        break;
+                    case 'Report':
+                        console.log('Opening report dialog');
+                        break;
+                    case 'Settings':
+                        console.log('Opening settings');
+                        break;
+                }
+            });
+        });
+
+        const searchInput = document.querySelector('.search-container input');
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                console.log('Searching for:', this.value);
+            }
+        });
+
+        searchInput.addEventListener('focus', function () {
+            this.previousElementSibling.style.color = 'var(--primary)';
+        });
+
+        searchInput.addEventListener('blur', function () {
+            this.previousElementSibling.style.color = 'var(--text-secondary)';
+        });
+
+        document.querySelector('.user-profile').addEventListener('click', function () {
+            this.classList.toggle('active');
+        });
+    </script>
+</body>
+
+</html>
