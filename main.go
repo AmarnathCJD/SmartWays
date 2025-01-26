@@ -47,5 +47,7 @@ func main() {
 	})))
 
 	r.HandleFunc("/maps", modules.GmapsProxyHandler)
-	http.ListenAndServe(":"+os.Getenv("PORT"), r)
+	if err := http.ListenAndServe(":"+os.Getenv("PORT"), r); err != nil {
+		panic(err)
+	}
 }
