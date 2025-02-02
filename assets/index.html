@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Traffic System Simulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            overflow: hidden;
+            background-color: #121212;
+            color: #ffffff;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75));
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .controls,
+        .light-controls,
+        .junction-info,
+        .map-container {
+            position: fixed;
+            z-index: 100;
+            background: rgba(30, 30, 30, 0.95);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            color: white;
+            animation: fadeIn 0.5s ease-out;
+            border: 1px solid rgba(255, 51, 51, 0.3);
+        }
+
+        .controls {
+            left: 20px;
+            top: 20px;
+            min-width: 180px;
+        }
+
+        .light-controls {
+            right: 20px;
+            top: 20px;
+            padding: 1.25rem;
+            min-width: auto;
+        }
+
+        .junction-info {
+            left: 20px;
+            bottom: 20px;
+            max-width: 300px;
+            background: rgba(30, 30, 30, 0.98);
+        }
+
+        .junction-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 51, 51, 0.3);
+        }
+
+        .junction-header i {
+            color: #ff3333;
+            font-size: 1.2rem;
+        }
+
+        .junction-header h3 {
+            margin: 0;
+            color: #ff3333;
+            font-size: 1.2rem;
+        }
+
+        .junction-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .stat-item i {
+            width: 20px;
+            color: #ff3333;
+        }
+
+        .map-container {
+            right: 20px;
+            bottom: 20px;
+            padding: 10px;
+            width: 300px;
+            height: 200px;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            background-color: #2a2a2a;
+            border-radius: 20px;
+            transition: .3s;
+            margin-right: 8px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .3s;
+        }
+
+        input:checked+.slider {
+            background-color: #ff3333;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        .label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .mode-toggle {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .light-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .direction-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .direction-label {
+            font-size: 0.8rem;
+            color: #888;
+            width: 15px;
+        }
+
+        .light-group {
+            display: flex;
+            gap: 4px;
+        }
+
+        .light-btn {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .light-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .light-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .light-btn.red {
+            background: #ff3333;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+        }
+
+        .light-btn.yellow {
+            background: #ffbb33;
+            box-shadow: 0 0 15px rgba(255, 187, 51, 0.3);
+        }
+
+        .light-btn.green {
+            background: #00C851;
+            box-shadow: 0 0 15px rgba(0, 200, 81, 0.3);
+        }
+
+        .light-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #startStop {
+            width: 100%;
+            padding: 11px;
+            background: #ff3333;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.3);
+        }
+
+        #startStop:hover {
+            background: #ff4444;
+            transform: translateY(-1px);
+            box-shadow: 0 0 30px rgba(255, 51, 51, 0.4);
+        }
+
+        #startStop:active {
+            transform: translateY(1px);
+        }
+
+        .stats {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .stats i {
+            color: #ff3333;
+            margin-right: 5px;
+        }
+
+        .spawn-controls {
+            display: flex;
+            justify-content: center;
+        }
+
+        .spawn-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 35px);
+            grid-template-rows: repeat(2, 35px);
+            gap: 5px;
+        }
+
+        .spawn-btn {
+            padding: 5px;
+            background: #2a2a2a;
+            color: white;
+            border: 1px solid #ff3333;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spawn-btn:hover {
+            background: #333;
+            transform: translateY(-1px);
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+        }
+
+        .spawn-btn:active {
+            transform: translateY(1px);
+        }
+
+        .spawn-btn i {
+            color: #ff3333;
+        }
+
+        #trafficCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Road borders and neon effects */
+        .road-border {
+            position: absolute;
+            background: rgba(255, 51, 51, 0.2);
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.3);
+        }
+
+        /* Density indicators */
+        .density-low {
+            color: #00C851;
+        }
+
+        .density-medium {
+            color: #ffbb33;
+        }
+
+        .density-high {
+            color: #ff3333;
+        }
+
+        @media (max-width: 768px) {
+
+            .controls,
+            .light-controls,
+            .junction-info,
+            .map-container {
+                padding: 1rem;
+            }
+
+            .map-container {
+                width: 200px;
+                height: 150px;
+            }
+
+            .junction-info {
+                max-width: 200px;
+            }
+
+            .spawn-grid {
+                grid-template-columns: repeat(2, 30px);
+                grid-template-rows: repeat(2, 30px);
+            }
+
+            .light-buttons {
+                gap: 0.5rem;
+            }
+
+            .light-btn {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="controls">
+        <button id="startStop">Start Simulation</button>
+        <div class="stats">
+            <div><i class="fas fa-arrow-up-down"></i> N-S: <span id="nsCount">0</span></div>
+            <div><i class="fas fa-arrow-left-right"></i> E-W: <span id="ewCount">0</span></div>
+        </div>
+        <div class="spawn-controls">
+            <div class="spawn-grid">
+                <button class="spawn-btn" data-direction="north"><i class="fas fa-arrow-up"></i></button>
+                <button class="spawn-btn" data-direction="south"><i class="fas fa-arrow-down"></i></button>
+                <button class="spawn-btn" data-direction="east"><i class="fas fa-arrow-right"></i></button>
+                <button class="spawn-btn" data-direction="west"><i class="fas fa-arrow-left"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="light-controls">
+        <div class="mode-toggle">
+            <label class="switch">
+                <input type="checkbox" id="autoMode" checked>
+                <span class="slider"></span>
+                <span class="label">Auto</span>
+            </label>
+        </div>
+        <div class="light-buttons">
+            <div class="direction-group">
+                <span class="direction-label"><i class="fas fa-arrow-up"></i></span>
+                <div class="light-group">
+                    <button class="light-btn red" data-direction="north" data-color="red" title="Red"></button>
+                    <button class="light-btn yellow" data-direction="north" data-color="yellow" title="Yellow"></button>
+                    <button class="light-btn green" data-direction="north" data-color="green" title="Green"></button>
+                </div>
+            </div>
+            <div class="direction-group">
+                <span class="direction-label"><i class="fas fa-arrow-down"></i></span>
+                <div class="light-group">
+                    <button class="light-btn red" data-direction="south" data-color="red" title="Red"></button>
+                    <button class="light-btn yellow" data-direction="south" data-color="yellow" title="Yellow"></button>
+                    <button class="light-btn green" data-direction="south" data-color="green" title="Green"></button>
+                </div>
+            </div>
+            <div class="direction-group">
+                <span class="direction-label"><i class="fas fa-arrow-right"></i></span>
+                <div class="light-group">
+                    <button class="light-btn red" data-direction="east" data-color="red" title="Red"></button>
+                    <button class="light-btn yellow" data-direction="east" data-color="yellow" title="Yellow"></button>
+                    <button class="light-btn green" data-direction="east" data-color="green" title="Green"></button>
+                </div>
+            </div>
+            <div class="direction-group">
+                <span class="direction-label"><i class="fas fa-arrow-left"></i></span>
+                <div class="light-group">
+                    <button class="light-btn red" data-direction="west" data-color="red" title="Red"></button>
+                    <button class="light-btn yellow" data-direction="west" data-color="yellow" title="Yellow"></button>
+                    <button class="light-btn green" data-direction="west" data-color="green" title="Green"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="junction-info">
+        <div class="junction-header">
+            <i class="fas fa-traffic-light"></i>
+            <h3>Silicon Valley Junction</h3>
+        </div>
+        <div class="junction-stats">
+            <div class="stat-item">
+                <i class="fas fa-car-side"></i>
+                <span>Density: <span id="density" class="density-medium">Medium</span></span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-clock"></i>
+                <span>Peak Hours: <span class="peak-hours">8AM-10AM, 5PM-7PM</span></span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-temperature-high"></i>
+                <span>Weather: <span class="weather">Clear</span></span>
+            </div>
+        </div>
+    </div>
+    <div class="map-container">
+        <iframe src="UMB" style="border:0;" allowfullscreen="" loading="lazy">
+        </iframe>
+    </div>
+    <canvas id="trafficCanvas"></canvas>
+    <script type="module" src="assets/main.js"></script>
+</body>
+
+</html>

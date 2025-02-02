@@ -4,6 +4,7 @@ go 1.23.2
 
 require (
 	github.com/go-chi/chi/v5 v5.2.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	go.mongodb.org/mongo-driver v1.17.2
 )

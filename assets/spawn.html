@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Control Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        @keyframes move {
+            100% {
+                transform: translate3d(0, 0, 1px) rotate(360deg);
+            }
+        }
+
+        .background {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        .background span {
+            width: 2px;
+            height: 2px;
+            background: #4a4a4a;
+            position: absolute;
+            animation: move linear infinite;
+            border-radius: 50%;
+        }
+
+        .background span:nth-child(0) {
+            left: 27%;
+            top: 79%;
+            animation-duration: 10s;
+        }
+
+        .background span:nth-child(1) {
+            left: 65%;
+            top: 68%;
+            animation-duration: 14s;
+        }
+
+        .background span:nth-child(2) {
+            left: 42%;
+            top: 23%;
+            animation-duration: 13s;
+        }
+
+        .background span:nth-child(3) {
+            left: 91%;
+            top: 47%;
+            animation-duration: 15s;
+        }
+
+        .background span:nth-child(4) {
+            left: 87%;
+            top: 38%;
+            animation-duration: 12s;
+        }
+
+        .background span:nth-child(5) {
+            left: 14%;
+            top: 75%;
+            animation-duration: 16s;
+        }
+
+        body {
+            min-height: 100vh;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .control-panel {
+            background: rgba(30, 30, 30, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-out;
+            border: 1px solid rgba(255, 51, 51, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+        }
+
+        .panel-header i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .spawn-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            padding-left: 35px;
+            background: #2a2a2a;
+            border: 1px solid #ff3333;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ff3333;
+        }
+
+        .spawn-button {
+            grid-column: span 2;
+            padding: 12px;
+            background: linear-gradient(135deg, #ff3333, #ff5555);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .spawn-button:hover {
+            background: linear-gradient(135deg, #ff4444, #ff6666);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.4);
+        }
+
+        .spawn-button:active {
+            transform: translateY(0);
+        }
+
+        .clear-button {
+            grid-column: span 2;
+            padding: 12px;
+            background: linear-gradient(135deg, #4a4a4a, #2a2a2a);
+            color: white;
+            border: 1px solid #ff3333;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 1rem;
+        }
+
+        .clear-button:hover {
+            background: linear-gradient(135deg, #5a5a5a, #3a3a3a);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.2);
+        }
+
+        .clear-button:active {
+            transform: translateY(0);
+        }
+
+        .toggles {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 51, 51, 0.3);
+        }
+
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .toggle input {
+            display: none;
+        }
+
+        .toggle input:checked+.toggle-switch {
+            background: linear-gradient(135deg, #ff3333, #ff5555);
+        }
+
+        .toggle input:checked+.toggle-switch::before {
+            transform: translateX(20px);
+        }
+
+        .presets {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .preset-button {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            border: 1px solid #ff3333;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .preset-button:hover {
+            background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+        }
+
+        .preset-button:active {
+            transform: translateY(0);
+        }
+
+        .preset-button i {
+            color: #ff3333;
+        }
+
+        @media (max-width: 480px) {
+            .control-panel {
+                padding: 1.5rem;
+            }
+
+            .spawn-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .spawn-button,
+            .clear-button {
+                grid-column: span 1;
+            }
+
+            .toggles {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .presets {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="control-panel">
+        <div class="panel-header">
+            <i class="fas fa-traffic-light"></i>
+            <h2>Traffic Control</h2>
+        </div>
+
+        <div class="presets">
+            <button class="preset-button" id="rushHour">
+                <i class="fas fa-business-time"></i>
+                Rush Hour
+            </button>
+            <button class="preset-button" id="schoolZone">
+                <i class="fas fa-school"></i>
+                School Zone
+            </button>
+        </div>
+
+        <div class="spawn-controls">
+            <div class="input-group">
+                <i class="fas fa-arrow-up"></i>
+                <input type="number" min="0" placeholder="North" id="northSpawn">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-arrow-down"></i>
+                <input type="number" min="0" placeholder="South" id="southSpawn">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-arrow-right"></i>
+                <input type="number" min="0" placeholder="East" id="eastSpawn">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-arrow-left"></i>
+                <input type="number" min="0" placeholder="West" id="westSpawn">
+            </div>
+            <button class="spawn-button">
+                <i class="fas fa-car"></i>
+                Spawn Vehicles
+            </button>
+            <button class="clear-button">
+                <i class="fas fa-broom"></i>
+                Clear All Vehicles
+            </button>
+        </div>
+
+        <div class="toggles">
+            <label class="toggle">
+                <input type="checkbox" id="randomSpawn" checked>
+                <span class="toggle-switch"></span>
+                <span>Random Spawns</span>
+            </label>
+            <label class="toggle">
+                <input type="checkbox" id="autoControl" checked>
+                <span class="toggle-switch"></span>
+                <span>Auto Control</span>
+            </label>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const spawnButton = document.querySelector('.spawn-button');
+        const clearButton = document.querySelector('.clear-button');
+        const randomSpawnToggle = document.getElementById('randomSpawn');
+        const autoControlToggle = document.getElementById('autoControl');
+        const rushHourPreset = document.getElementById('rushHour');
+        const schoolZonePreset = document.getElementById('schoolZone');
+        const inputs = {
+            north: document.getElementById('northSpawn'),
+            south: document.getElementById('southSpawn'),
+            east: document.getElementById('eastSpawn'),
+            west: document.getElementById('westSpawn')
+        };
+
+        // Traffic presets
+        const presets = {
+            rushHour: {
+                north: 16,
+                south: 20,
+                east: 0,
+                west: 5
+            },
+            schoolZone: {
+                north: 8,
+                south: 12,
+                east: 3,
+                west: 3
+            }
+        };
+
+        // Function to apply preset values
+        function applyPreset(preset) {
+            Object.entries(preset).forEach(([direction, value]) => {
+                inputs[direction].value = value;
+            });
+        }
+
+        // Handle preset button clicks
+        rushHourPreset.addEventListener('click', () => {
+            applyPreset(presets.rushHour);
+        });
+
+        schoolZonePreset.addEventListener('click', () => {
+            applyPreset(presets.schoolZone);
+        });
+
+        // Function to send API requests
+        async function sendRequest(url, data = null) {
+            try {
+                const options = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        spawnButton.addEventListener('click', async () => {
+            const spawnArray = [
+                parseInt(inputs.north.value) || 0,
+                parseInt(inputs.south.value) || 0,
+                parseInt(inputs.east.value) || 0,
+                parseInt(inputs.west.value) || 0
+            ];
+
+            await sendRequest('/api/spawn', spawnArray);
+            Object.values(inputs).forEach(input => input.value = '');
+        });
+
+        clearButton.addEventListener('click', async () => {
+            await sendRequest('/api/clear-vehicles');
+        });
+
+        randomSpawnToggle.addEventListener('change', async (e) => {
+            await sendRequest('/api/toggle-spawn', { enabled: e.target.checked });
+        });
+
+        autoControlToggle.addEventListener('change', async (e) => {
+            await sendRequest('/api/toggle-auto', { enabled: e.target.checked });
+        });
+
+        document.querySelectorAll('.input-group').forEach((group, index) => {
+            group.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        const background = document.querySelector('.background');
+        for (let i = 0; i < 20; i++) {
+            const star = document.createElement('span');
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDuration = (Math.random() * 15 + 5) + 's';
+            background.appendChild(star);
+        }
+    </script>
+</body>
+
+</html>

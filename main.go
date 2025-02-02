@@ -26,6 +26,10 @@ func main() {
 	// API routes
 	r.Post("/api/login", modules.LoginHandler)
 	r.Post("/api/register", modules.RegisterHandler)
+	r.Post("/api/spawn", modules.SpawnRequestHandler)
+	r.Post("/api/toggle-spawn", modules.HandleRandomToggle)
+	r.Post("/api/toggle-auto", modules.HandleAutoToggle)
+	r.Post("/api/clear-vehicles", modules.ClearVehiclesHandler)
 
 	// HTML routes
 	r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
@@ -41,12 +45,27 @@ func main() {
 		dashboard.Execute(w, user)
 	})))
 
+	r.HandleFunc("/demo", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "assets/index.html")
+	})
+	r.HandleFunc("/spawn", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "assets/spawn.html")
+	})
+	r.HandleFunc("/ws", modules.HandleWSConnections)
+
+	r.Handle("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
+
 	r.Handle("/", modules.TokenCheck(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.Context().Value("user")
 		w.Write([]byte("Welcome to SmartWays"))
 	})))
 
 	r.HandleFunc("/maps", modules.GmapsProxyHandler)
+
+	// sse
+	go modules.StartTrafficSimulation()
+	go modules.BroadcastTrafficUpdates()
+
 	if err := http.ListenAndServe(":"+os.Getenv("PORT"), r); err != nil {
 		panic(err)
 	}
