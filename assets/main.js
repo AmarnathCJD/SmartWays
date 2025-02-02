@@ -89,7 +89,7 @@ function animate(timestamp) {
     requestAnimationFrame(animate);
 }
 
-const socket = new WebSocket(`ws://${window.location.host}/ws`);
+const socket = new WebSocket(`wss://${window.location.host}/ws`);
 socket.onmessage = (event) => {
     if (!trafficSystem.manualLightChange) return;
     let data;
