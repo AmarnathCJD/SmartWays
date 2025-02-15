@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Emergency Vehicle Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1E1E1E;
+            --bg-input: #2D2D2D;
+            --red-500: #ef4444;
+            --text-white: #ffffff;
+            --text-gray: #888888;
+            --border-dark: #333333;
+            --green-500: #22c55e;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('https://images.unsplash.com/photo-1573108724029-4c46571d6490?auto=format&fit=crop&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: var(--text-white);
+            min-height: 100vh;
+            display: flex;
+            place-items: center;
+            line-height: 1.5;
+        }
+
+        /* Container styles */
+        .container {
+            max-width: 32rem;
+            margin: 0 auto;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            }
+
+            to {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .card-title {
+            color: var(--red-500);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-gray);
+        }
+
+        .form-select,
+        .form-input {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-dark);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: var(--text-white);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .form-select:focus,
+        .form-input:focus {
+            outline: none;
+            border-color: var(--red-500);
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+        }
+
+        .form-select option {
+            background-color: var(--bg-input);
+            color: var(--text-white);
+        }
+
+        .btn {
+            width: 100%;
+            background-color: var(--red-500);
+            color: var(--text-white);
+            border: none;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .btn:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Alert Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            animation: fadeIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        .modal {
+            background-color: var(--bg-card);
+            border-radius: 0.75rem;
+            max-width: 32rem;
+            width: 100%;
+            padding: 2rem;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(239, 68, 68, 0.2),
+                0 0 30px rgba(239, 68, 68, 0.2);
+            animation: slideIn 0.4s ease-out, modalGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes modalGlow {
+            from {
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3),
+                    0 0 0 1px rgba(239, 68, 68, 0.2),
+                    0 0 30px rgba(239, 68, 68, 0.2);
+            }
+
+            to {
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3),
+                    0 0 0 1px rgba(239, 68, 68, 0.2),
+                    0 0 50px rgba(239, 68, 68, 0.4);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .modal-title {
+            color: var(--red-500);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border-radius: 0.375rem;
+        }
+
+        .close-btn:hover {
+            color: var(--text-white);
+            background-color: var(--bg-input);
+        }
+
+        .alert-content {
+            background-color: var(--bg-input);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin: 1.25rem 0;
+        }
+
+        .alert-warning {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin-top: 1.25rem;
+        }
+
+        .alert-message {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin: 0;
+            padding: 0;
+        }
+
+        .destination-text {
+            color: var(--red-500);
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .vehicle-text {
+            color: var(--text-gray);
+            font-size: 1rem;
+            margin: 0.5rem 0 0 0;
+        }
+
+        .warning-text {
+            font-size: 1rem;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border-dark);
+        }
+
+        .status-label {
+            font-size: 1rem;
+            color: var(--text-gray);
+        }
+
+        .status-active {
+            color: var(--red-500);
+            font-weight: 600;
+            font-size: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        .status-stopped {
+            color: var(--green-500);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .stop-alert-btn {
+            background-color: var(--bg-input);
+            color: var(--red-500);
+            border: 1px solid var(--red-500);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .stop-alert-btn:hover {
+            background-color: var(--red-500);
+            color: var(--text-white);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .card,
+            .modal {
+                padding: 1.5rem;
+            }
+
+            .card-title {
+                font-size: 1.25rem;
+            }
+
+            .form-label {
+                font-size: 0.875rem;
+            }
+
+            .form-select,
+            .form-input,
+            .btn {
+                font-size: 1rem;
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    ⚠️ Emergency Vehicle Control
+                </h2>
+            </div>
+
+            <form id="emergencyForm">
+                <div class="form-group">
+                    <label for="emergencyType" class="form-label">Emergency Type</label>
+                    <select id="emergencyType" class="form-select" required>
+                        <option value="ambulance">Ambulance</option>
+                        <option value="fire">Fire Truck</option>
+                        <option value="police">Police Vehicle</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="destination" class="form-label">Destination</label>
+                    <input type="text" id="destination" class="form-input" placeholder="Enter destination" required />
+                </div>
+
+                <button type="submit" class="btn">
+                    🚨 Trigger Emergency Route
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">⚠️ Emergency Alert</h2>
+                <button id="closeModal" class="close-btn">✕</button>
+            </div>
+
+            <div>
+                <p class="alert-message">
+                    ⚠️ Emergency vehicle approaching! Please clear the following route:
+                </p>
+
+                <div class="alert-content">
+                    <p class="destination-text">
+                        Destination: <span id="destinationDisplay"></span>
+                    </p>
+                    <p class="vehicle-text">
+                        Vehicle Type: <span id="vehicleTypeDisplay"></span>
+                    </p>
+                </div>
+
+                <div class="alert-warning">
+                    <p class="warning-text">
+                        All traffic signals along the route will be automatically adjusted to facilitate
+                        emergency vehicle passage. Please follow traffic instructions.
+                    </p>
+                </div>
+
+                <div class="status-container">
+                    <span class="status-label">Status:</span>
+                    <span id="alertStatus" class="status-active">ACTIVE</span>
+                </div>
+
+                <button id="stopAlert" class="stop-alert-btn">
+                    ⏹️ Stop Emergency Alert
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.querySelector('#emergencyForm');
+        const emergencyTypeSelect = document.querySelector('#emergencyType');
+        const destinationInput = document.querySelector('#destination');
+        const modalOverlay = document.querySelector('#modalOverlay');
+        const closeModalBtn = document.querySelector('#closeModal');
+        const destinationDisplay = document.querySelector('#destinationDisplay');
+        const vehicleTypeDisplay = document.querySelector('#vehicleTypeDisplay');
+        const stopAlertBtn = document.querySelector('#stopAlert');
+        const alertStatus = document.querySelector('#alertStatus');
+
+        let currentAlertId = null;
+
+        form.addEventListener('submit', handleEmergencyAlert);
+        closeModalBtn.addEventListener('click', closeModal);
+        stopAlertBtn.addEventListener('click', stopEmergencyAlert);
+
+        async function handleEmergencyAlert(e) {
+            e.preventDefault();
+
+            const destination = destinationInput.value;
+            const emergencyType = emergencyTypeSelect.value;
+
+            try {
+                const response = await fetch('/emergency-alerts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        destination,
+                        emergencyType,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                const data = await response.json();
+                currentAlertId = data.id;
+
+                destinationDisplay.textContent = destination;
+                vehicleTypeDisplay.textContent = capitalizeFirst(emergencyType);
+                alertStatus.textContent = 'ACTIVE';
+                alertStatus.className = 'status-active';
+                stopAlertBtn.style.display = 'block';
+
+                modalOverlay.style.display = 'flex';
+            } catch (error) {
+                console.error('Failed to send alert:', error);
+                alert('Failed to send emergency alert. Please try again.');
+            }
+        }
+
+        async function stopEmergencyAlert() {
+            if (!currentAlertId) return;
+
+            try {
+                await fetch(`/emergency-alerts/${currentAlertId}/stop`, {
+                    method: 'POST'
+                });
+
+                alertStatus.textContent = 'STOPPED';
+                alertStatus.className = 'status-stopped';
+                stopAlertBtn.style.display = 'none';
+            } catch (error) {
+                console.error('Failed to stop alert:', error);
+                alert('Failed to stop emergency alert. Please try again.');
+            }
+        }
+
+        function closeModal() {
+            modalOverlay.style.display = 'none';
+            form.reset();
+        }
+
+        function capitalizeFirst(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

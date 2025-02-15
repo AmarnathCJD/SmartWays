@@ -31,6 +31,8 @@ func main() {
 	r.Post("/api/toggle-auto", modules.HandleAutoToggle)
 	r.Post("/api/clear-vehicles", modules.ClearVehiclesHandler)
 
+	r.Get("/api/jn", modules.GetJunctionHandler)
+
 	// HTML routes
 	r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "assets/login.html")
@@ -50,6 +52,9 @@ func main() {
 	})
 	r.HandleFunc("/spawn", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "assets/spawn.html")
+	})
+	r.HandleFunc("/emergency", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "assets/emergency.html")
 	})
 	r.HandleFunc("/ws", modules.HandleWSConnections)
 

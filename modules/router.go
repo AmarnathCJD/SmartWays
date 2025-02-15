@@ -2,10 +2,12 @@ package modules
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func TokenCheck(next http.Handler) http.Handler {
@@ -81,6 +83,24 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func GetJunctionHandler(w http.ResponseWriter, r *http.Request) {
+	jid := r.URL.Query().Get("jid")
+	jidInt, err := strconv.Atoi(jid)
+	if err != nil {
+		http.Error(w, `{"message": "Invalid junction ID"}`, http.StatusBadRequest)
+		return
+	}
+	for _, j := range Junctions {
+		if j.JnID == jidInt {
+			w.Header().Set("Content-Type", "application/json")
+			jn, _ := json.Marshal(j)
+			w.Write(jn)
+			return
+		}
+	}
+	http.Error(w, `{"message": "Junction not found"}`, http.StatusNotFound)
 }
 
 func GmapsProxyHandler(w http.ResponseWriter, r *http.Request) {
