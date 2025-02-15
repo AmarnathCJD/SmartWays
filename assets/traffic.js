@@ -346,6 +346,7 @@ class TrafficLight {
         this.greenDuration = 100;
         this.durDecFunc;
         this.phaseTimer = 0;
+        this.yellowDuration = 40;
     }
 
     manualChange(newState) {
