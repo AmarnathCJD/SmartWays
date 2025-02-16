@@ -67,6 +67,11 @@ func main() {
 
 	r.HandleFunc("/maps", modules.GmapsProxyHandler)
 
+	// ALERTS
+	r.Get("/api/alerts", modules.GetAlertsHandler)
+	r.Post("/api/alerts", modules.AddAlertHandler)
+	r.Post("/api/delalert", modules.RemoveAlertHandler)
+
 	// sse
 	go modules.StartTrafficSimulation()
 	go modules.BroadcastTrafficUpdates()

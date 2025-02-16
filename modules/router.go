@@ -127,3 +127,70 @@ func GmapsProxyHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(resp.StatusCode)
 	io.Copy(w, resp.Body)
 }
+
+func AddAlertHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	var resp struct {
+		UserId    string `json:"user_id"`
+		AlertType string `json:"type"`
+		Location  struct {
+			Latitude  float64 `json:"latitude"`
+			Longitude float64 `json:"longitude"`
+		} `json:"location"`
+		Severity  string `json:"severity"`
+		Dest      string `json:"destination"`
+		Clearance bool   `json:"requiresClearance"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	alert := Alert{
+		AlertID:     genAlertId(),
+		UserID:      resp.UserId,
+		AlertType:   convertAlertType(resp.AlertType),
+		Location:    [2]float64{resp.Location.Latitude, resp.Location.Longitude},
+		Destination: resp.Dest,
+		Severity:    convertInt(resp.Severity),
+		Clearance:   resp.Clearance,
+	}
+
+	broadcast <- TrafficEvent{Type: "alert", Direction: alert.Destination, Color: resp.AlertType, CountAllowed: alert.Severity}
+
+	err = AddAlert(alert)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte(`{"message": "Alert added successfully", "alert_id": "` + alert.AlertID + `"}`))
+}
+
+func RemoveAlertHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	alertId := r.FormValue("alert_id")
+	err := RemoveAlert(alertId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte(`{"message": "Alert removed successfully"}`))
+}
+
+func GetAlertsHandler(w http.ResponseWriter, r *http.Request) {
+	alerts, err := GetAlerts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	alertsJson, _ := json.Marshal(alerts)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(alertsJson)
+}

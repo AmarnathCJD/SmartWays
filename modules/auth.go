@@ -189,3 +189,82 @@ func genUserId() string {
 	id := random.Int63n(max-min) + min
 	return fmt.Sprintf("SW%d", id)
 }
+
+type Alert struct {
+	AlertID     string     `json:"alertid"`
+	UserID      string     `json:"userid"`
+	AlertType   int        `json:"alerttype"`
+	Location    [2]float64 `json:"location"`
+	Destination string     `json:"destination"`
+	Severity    int        `json:"severity"`
+	Clearance   bool       `json:"clearance"`
+}
+
+const (
+	ACCIDENT = iota + 1
+	FIRE
+	POLICE
+)
+
+func convertAlertType(t string) int {
+	switch t {
+	case "accident":
+		return ACCIDENT
+	case "fire":
+		return FIRE
+	case "police":
+		return POLICE
+	default:
+		return ACCIDENT
+	}
+}
+
+func AddAlert(a Alert) error {
+	_, err := DB.Collection("alerts").InsertOne(context.Background(), a)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func genAlertId() string {
+	length := 6
+	seed := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(seed)
+
+	min := int64(math.Pow10(length - 1))
+	max := int64(math.Pow10(length))
+
+	id := random.Int63n(max-min) + min
+	return fmt.Sprintf("AL%d", id)
+}
+
+func GetAlerts() ([]Alert, error) {
+	alerts := []Alert{}
+	cursor, err := DB.Collection("alerts").Find(context.Background(), bson.M{})
+	if err != nil {
+		return alerts, err
+	}
+
+	for cursor.Next(context.Background()) {
+		alert := Alert{}
+		err := cursor.Decode(&alert)
+		if err != nil {
+			return alerts, err
+		}
+
+		alerts = append(alerts, alert)
+	}
+
+	return alerts, nil
+}
+
+func RemoveAlert(alertID string) error {
+	_, err := DB.Collection("alerts").DeleteOne(context.Background(), bson.M{"alertid": alertID})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

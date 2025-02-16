@@ -9,6 +9,8 @@ video_path = "vids/5229647-uhd_2560_1440_30fps.mp4"
 cap = cv2.VideoCapture(video_path)
 model = YOLO("models/yolo11n.pt")
 
+input("Press Enter to Start the Video Analysis...")
+
 classnames = ["car", "truck", "bus"]
 
 road_zoneA = np.array(

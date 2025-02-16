@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Round" rel="stylesheet">
     <link href="assets/style.css" rel="stylesheet">
     <script src="/maps"></script>
 </head>
@@ -46,13 +47,17 @@
         <div class="map-container">
             <div id="map"></div>
             <div class="control-panel">
-                <button class="control-btn" data-tooltip="Stop sharing location">
+                <script>
+                    let shareLocation = true;
+                </script>
+                <button class="control-btn" data-tooltip="Stop sharing location"
+                    onclick="shareLocation ? createNotification('Location sharing stopped', 'Your location is no longer being shared', 'info') : createNotification('Location sharing started', 'Your location is now being shared', 'info'); shareLocation = !shareLocation; document.getElementById('loc').textContent = shareLocation ? 'Stop' : 'Start';">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
                         <circle cx="12" cy="10" r="3" />
                     </svg>
-                    <span>Stop</span>
+                    <span id="loc">Stop</span>
                 </button>
                 <button class="control-btn" data-tooltip="Find better routes">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1325,7 +1330,9 @@
                     return;
                 }
 
-                if (activeJunction !== 0) return;
+                if (activeJunction !== 0 && data.type !== 'alert') {
+                    return;
+                }
 
                 if (data.type === 'vehicleUpdate') {
                     manip(data.direction[0], "inc");
@@ -1341,6 +1348,22 @@
                         signalTimes[index] = data.timeEffective || 0;
                         updateSignalText(index);
                     }
+                } else if (data.type === 'alert') {
+                    let content = '';
+                    let severity = 'info';
+                    if (data.color === 'ambulance') {
+                        content = 'An ambulance is approaching your location. Please make way, and be prepared for delays.';
+                        severity = 'warning';
+                    } else if (data.color === 'fire') {
+                        content = 'A firetruck is approaching your location. Nearby Fires have been reported. Please be cautious.';
+                        severity = 'error';
+                    } else {
+                        content = 'Police and Emergency Services are on their way to your location. Please be cautious.';
+                        severity = 'warning';
+                    }
+
+                    content += ' ( Destination: ' + data.direction + ' )';
+                    createNotification("Caution: New Alert", content, severity, 15000);
                 }
             };
         }
@@ -1375,6 +1398,61 @@
         }
 
         lightUpdater();
+
+        function createNotification(title, content, severity = 'info', duration = 5000) {
+            const notification = document.createElement('div');
+            notification.className = `toast-notification toast-notification-${severity} toast-notification-slide-in`;
+
+            notification.innerHTML = `
+    <div class="toast-notification-content">
+      <span class="material-icons-round toast-notification-icon">
+        ${getIconForSeverity(severity)}
+      </span>
+      <div class="toast-notification-text">
+        <div class="toast-notification-title">${title}</div>
+        <div class="toast-notification-message">${content}</div>
+      </div>
+      <button class="toast-notification-close">
+        <span class="material-icons-round">close</span>
+      </button>
+    </div>
+    <div class="toast-notification-progress"></div>
+  `;
+
+            const container = document.querySelector('.toast-notification-container') || (() => {
+                const cont = document.createElement('div');
+                cont.className = 'toast-notification-container';
+                document.body.appendChild(cont);
+                return cont;
+            })();
+
+            container.appendChild(notification);
+            const progress = notification.querySelector('.toast-notification-progress');
+            progress.style.animation = `progress ${duration}ms linear`;
+
+            const closeBtn = notification.querySelector('.toast-notification-close');
+            closeBtn.addEventListener('click', () => {
+                notification.classList.add('toast-notification-slide-out');
+                setTimeout(() => notification.remove(), 300);
+            });
+
+            if (duration) {
+                setTimeout(() => {
+                    notification.classList.add('toast-notification-slide-out');
+                    setTimeout(() => notification.remove(), 300);
+                }, duration);
+            }
+        }
+
+        function getIconForSeverity(severity) {
+            const icons = {
+                success: 'check_circle',
+                error: 'error',
+                warning: 'warning',
+                info: 'info'
+            };
+            return icons[severity] || 'info';
+        }
     </script>
 </body>
 

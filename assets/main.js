@@ -89,7 +89,7 @@ function animate(timestamp) {
     requestAnimationFrame(animate);
 }
 
-let socket_url = 'ws://localhost:8080/ws';
+let socket_url = 'ws://localhost/ws';
 if (window.location.protocol === 'https:') {
     socket_url = `wss://${window.location.host}/ws`;
 }
