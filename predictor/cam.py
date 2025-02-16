@@ -7,7 +7,7 @@ from sort import *
 
 video_path = "vids/5229647-uhd_2560_1440_30fps.mp4"
 cap = cv2.VideoCapture(video_path)
-model = YOLO("models/yolov8n.pt")
+model = YOLO("models/yolo11n.pt")
 
 classnames = ["car", "truck", "bus"]
 
