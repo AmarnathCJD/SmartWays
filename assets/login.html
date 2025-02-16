@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Round" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -213,6 +214,188 @@
                 font-size: 1.4rem;
             }
         }
+
+        /* Toast Container */
+        .toast-notification-wrapper {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        /* Toast Notification Base */
+        .toast-notification-item {
+            background: rgba(23, 23, 23, 0.98);
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 24rem;
+            width: 100%;
+            pointer-events: auto;
+            transform-origin: top right;
+        }
+
+        /* Toast Content Layout */
+        .toast-notification-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.875rem;
+            flex: 1;
+        }
+
+        /* Toast Icon */
+        .toast-notification-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        /* Toast Text Container */
+        .toast-notification-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toast-notification-title {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            line-height: 1.4;
+            margin-bottom: 0.25rem;
+        }
+
+        .toast-notification-message {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Close Button */
+        .toast-notification-close {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 0.25rem;
+            margin: -0.25rem -0.25rem -0.25rem 0.5rem;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .toast-notification-close:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Toast Variants */
+        .toast-notification-success {
+            border-left: 4px solid #10b981;
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(23, 23, 23, 0.98));
+        }
+
+        .toast-notification-success .toast-notification-icon {
+            color: #10b981;
+        }
+
+        .toast-notification-error {
+            border-left: 4px solid #ef4444;
+            background: linear-gradient(to right, rgba(239, 68, 68, 0.1), rgba(23, 23, 23, 0.98));
+        }
+
+        .toast-notification-error .toast-notification-icon {
+            color: #ef4444;
+        }
+
+        .toast-notification-warning {
+            border-left: 4px solid #f59e0b;
+            background: linear-gradient(to right, rgba(245, 158, 11, 0.1), rgba(23, 23, 23, 0.98));
+        }
+
+        .toast-notification-warning .toast-notification-icon {
+            color: #f59e0b;
+        }
+
+        .toast-notification-info {
+            border-left: 4px solid #3b82f6;
+            background: linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(23, 23, 23, 0.98));
+        }
+
+        .toast-notification-info .toast-notification-icon {
+            color: #3b82f6;
+        }
+
+        /* Animations */
+        @keyframes toast-slide-in {
+            from {
+                transform: translateX(100%) scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes toast-slide-out {
+            from {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%) scale(0.9);
+                opacity: 0;
+            }
+        }
+
+        .toast-notification-enter {
+            animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toast-notification-exit {
+            animation: toast-slide-out 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Progress Bar */
+        .toast-notification-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0 0 0.75rem 0.75rem;
+        }
+
+        .toast-notification-progress-bar {
+            height: 100%;
+            background: currentColor;
+            border-radius: inherit;
+            transition: width linear;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            .toast-notification-wrapper {
+                top: 1rem;
+                right: 1rem;
+                left: 1rem;
+            }
+
+            .toast-notification-item {
+                max-width: none;
+            }
+        }
     </style>
 </head>
 
@@ -257,7 +440,7 @@
     <script>
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
             var email = document.getElementById('email').value;
             var password = document.getElementById('password').value;
 
@@ -275,14 +458,81 @@
                         document.cookie = `token=${response.data.token}; path=/`;
                         window.location.href = '/dashboard';
                     } else {
-                        alert(response.data.message);
+                        createNotification('Login Failed', response.data.message, 'error');
                     }
                 })
                 .catch(function (error) {
-                    alert(error.response.data);
+                    createNotification('Login Failed', error.response.data, 'error');
                     console.log(error);
                 });
         });
+
+        function createNotification(title, content, severity = 'info', duration = 5000) {
+            const notification = document.createElement('div');
+            notification.className = `toast-notification-item toast-notification-${severity} toast-notification-enter`;
+
+            notification.innerHTML = `
+    <div class="toast-notification-content">
+      <span class="material-icons-round toast-notification-icon">
+        ${getIconForSeverity(severity)}
+      </span>
+      <div class="toast-notification-text">
+        <div class="toast-notification-title">${title}</div>
+        <div class="toast-notification-message">${content}</div>
+      </div>
+      <button class="toast-notification-close">
+        <span class="material-icons-round">close</span>
+      </button>
+    </div>
+    <div class="toast-notification-progress">
+      <div class="toast-notification-progress-bar"></div>
+    </div>
+  `;
+
+            const container = document.querySelector('.toast-notification-wrapper') || (() => {
+                const cont = document.createElement('div');
+                cont.className = 'toast-notification-wrapper';
+                document.body.appendChild(cont);
+                return cont;
+            })();
+
+            container.appendChild(notification);
+
+            // Progress bar animation
+            const progressBar = notification.querySelector('.toast-notification-progress-bar');
+            progressBar.style.width = '100%';
+            progressBar.style.transition = `width ${duration}ms linear`;
+            requestAnimationFrame(() => {
+                progressBar.style.width = '0%';
+            });
+
+            // Close button functionality
+            const closeBtn = notification.querySelector('.toast-notification-close');
+            closeBtn.addEventListener('click', () => {
+                notification.classList.replace('toast-notification-enter', 'toast-notification-exit');
+                setTimeout(() => notification.remove(), 300);
+            });
+
+            // Auto-hide after duration
+            if (duration) {
+                setTimeout(() => {
+                    if (notification.isConnected) {
+                        notification.classList.replace('toast-notification-enter', 'toast-notification-exit');
+                        setTimeout(() => notification.remove(), 300);
+                    }
+                }, duration);
+            }
+        }
+
+        function getIconForSeverity(severity) {
+            const icons = {
+                success: 'check_circle',
+                error: 'error',
+                warning: 'warning',
+                info: 'info'
+            };
+            return icons[severity] || 'info';
+        }
     </script>
 </body>
 
