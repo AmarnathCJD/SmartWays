@@ -242,7 +242,9 @@
         <span>Manual Control</span>
     `;
             adminButton.setAttribute('data-tooltip', 'Toggle Manual Control');
-            adminButton.onclick = openManualControl;
+            adminButton.onclick = function () {
+                window.location.href = '/admin';
+            };
             controlPanel.appendChild(adminButton);
         } else if (userType === 2) {
             const emergencyButton = document.createElement('button');

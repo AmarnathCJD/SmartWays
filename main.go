@@ -50,6 +50,9 @@ func main() {
 	r.HandleFunc("/demo", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "assets/index.html")
 	})
+	r.HandleFunc("/admin", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "assets/index.html")
+	})
 	r.HandleFunc("/spawn", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "assets/spawn.html")
 	})
