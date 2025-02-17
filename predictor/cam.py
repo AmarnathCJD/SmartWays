@@ -69,9 +69,9 @@ while True:
                 detections = np.array([x1, y1, x2, y2, conf])
                 current_detections = np.vstack([current_detections, detections])
 
-    cv2.polylines(frame, [road_zoneA], isClosed=False, color=(0, 0, 255), thickness=8)
-    cv2.polylines(frame, [road_zoneB], isClosed=False, color=(0, 255, 255), thickness=8)
-    cv2.polylines(frame, [road_zoneC], isClosed=False, color=(255, 0, 0), thickness=8)
+    # cv2.polylines(frame, [road_zoneA], isClosed=False, color=(0, 0, 255), thickness=8)
+    # cv2.polylines(frame, [road_zoneB], isClosed=False, color=(0, 255, 255), thickness=8)
+    # cv2.polylines(frame, [road_zoneC], isClosed=False, color=(255, 0, 0), thickness=8)
 
     track_results = tracker.update(current_detections)
     for result in track_results:
