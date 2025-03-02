@@ -17,7 +17,7 @@ class Vehicle {
         this.turnRadius = 60;
         this.turnAngle = 0;
         this.acceleration = 0.1;
-        this.maxSpeed = 5;
+        this.maxSpeed = 4;
         this.brakeForce = 0.2;
     }
 
@@ -56,7 +56,7 @@ class Vehicle {
                 return;
             }
 
-            if (!this.isVehicleAhead(vehicles, this.speed + 60)) {
+            if (!this.isVehicleAhead(vehicles, this.speed + 30)) {
                 this.moveForward();
             }
 
@@ -492,8 +492,8 @@ export class TrafficSystem {
 
     createGrassPattern() {
         const patternCanvas = document.createElement('canvas');
-        patternCanvas.width = 17;
-        patternCanvas.height = 17;
+        patternCanvas.width = 22;
+        patternCanvas.height = 22;
         const pctx = patternCanvas.getContext('2d');
 
         pctx.fillStyle = '#1a472a';
@@ -652,7 +652,7 @@ export class TrafficSystem {
         const centerY = this.canvas.height / 2;
         const roadWidth = 200;
         const laneWidth = 40;
-        const grassWidth = 27;
+        const grassWidth = 60;
 
         ctx.save();
 

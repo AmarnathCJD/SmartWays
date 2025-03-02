@@ -31,6 +31,8 @@ function updateDensity() {
     densityElement.className = `density-${density.toLowerCase()}`;
 }
 
+isSimulationRunning = true;
+animate();
 startStopButton.addEventListener('click', () => {
     isSimulationRunning = !isSimulationRunning;
     startStopButton.textContent = isSimulationRunning ? 'Stop Simulation' : 'Start Simulation';
@@ -160,6 +162,3 @@ socket.onmessage = (event) => {
         socket.send(JSON.stringify({ phases: trafficSystem.getVehiclesInAllPhases() }));
     }
 };
-
-
-// setup serverside events, which notify of new vehicles, and traffic light changes
