@@ -58,11 +58,56 @@ lightButtons.forEach(button => {
     button.addEventListener('click', () => {
         if (!trafficSystem.manualLightChange) return;
 
-        const direction = button.dataset.direction;
-        const color = button.dataset.color;
-        const light = trafficSystem.trafficLights.find(l => l.direction === direction);
-        if (light) {
-            light.manualChange(color);
+        const l = trafficSystem.trafficLights.find(l => l.state === 'green');
+        if (l && l.direction !== button.dataset.direction && button.dataset.color === 'green') {
+            $.confirm({
+                title: 'Change Traffic Light',
+                content: `Multiple lights are currently green. Do you want to switch the current green light to red and make ${button.dataset.direction} green?`,
+                theme: 'supervan',
+                useBootstrap: false,
+                closeIcon: true,
+                columnClass: 'col-md-4 col-md-offset-4',
+                type: 'red',
+                buttons: {
+                    confirm: {
+                        text: 'Yes',
+                        action: () => {
+                            const light = trafficSystem.trafficLights.find(l => l.direction === button.dataset.direction);
+                            if (light) {
+                                light.manualChange(button.dataset.color);
+                            }
+                        },
+                        btnClass: 'btn-red'
+                    },
+                    switch: {
+                        text: 'Switch',
+                        action: () => {
+                            // make current green light -> red
+                            l.manualChange('red');
+                            // make the new light green
+                            const light = trafficSystem.trafficLights.find(l => l.direction === button.dataset.direction);
+                            if (light) {
+                                light.manualChange(button.dataset.color);
+                            }
+                        },
+                        btnClass: 'btn-green'
+                    },
+                    cancel: {
+                        text: 'No',
+                        action: () => {
+                            // close the modal
+                        },
+                        btnClass: 'btn-blue'
+                    }
+                }
+            });
+        } else {
+            const direction = button.dataset.direction;
+            const color = button.dataset.color;
+            const light = trafficSystem.trafficLights.find(l => l.direction === direction);
+            if (light) {
+                light.manualChange(color);
+            }
         }
     });
 });
