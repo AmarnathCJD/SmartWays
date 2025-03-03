@@ -1024,6 +1024,7 @@
         });
 
         function initMap() {
+            let loc = { lat: 9.9312, lng: 76.2673 };
             const map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: -34.397, lng: 150.644 },
                 zoom: 14,
@@ -1058,10 +1059,82 @@
                         elementType: "geometry",
                         stylers: [{ color: "#17263c" }],
                     }
-                ]
+                ],
             });
 
-            let loc = { lat: 9.9312, lng: 76.2673 };
+            map.addListener("click", (event) => {
+                const m = new google.maps.Marker({
+                    position: event.latLng,
+                    map: map,
+                    icon: {
+                        "url": "https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-driving-map-and-navigation-flaticons-lineal-color-flat-icons-6.png",
+                        "scale": 1,
+                        "fillColor": "#ff3333",
+                        "fillOpacity": 1,
+                    },
+                });
+
+                const lat = event.latLng.lat();
+                const lng = event.latLng.lng();
+                document.getElementById('current-loc').textContent = `${lat}, ${lng}`;
+
+                const nearestJunction = Object.keys(junctions).reduce((nearest, junction) => {
+                    const distance = Math.sqrt(Math.pow(lat - parseFloat(junction.split(",")[0]), 2) + Math.pow(lng - parseFloat(junction.split(",")[1]), 2));
+                    return distance < nearest.distance ? { distance, ...junction } : nearest;
+                });
+
+                const distance = calc_distance(lat, lng, { lat: parseFloat(nearestJunction.split(",")[0]), lng: parseFloat(nearestJunction.split(",")[1]) });
+                document.getElementById('nearest-name').textContent = junctions[nearestJunction].name + " ---> (" + distance.toFixed(2) + " km)";
+
+                // show directorions to it and make junctions passing throgh to color red
+                const directionsService = new google.maps.DirectionsService();
+                const directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true });
+                directionsRenderer.setMap(map);
+                let rt = directionsService.route(
+                    {
+                        origin: { location: loc },
+                        destination: {
+                            lat: lat,
+                            lng: lng,
+                        },
+                        travelMode: google.maps.TravelMode.DRIVING,
+                        provideRouteAlternatives: true,
+                        drivingOptions: {
+                            departureTime: new Date(),
+                            trafficModel: 'pessimistic'
+                        },
+                    },
+                    (response, status) => {
+                        if (status === "OK") {
+                            directionsRenderer.setDirections(response);
+                        } else {
+                            console.log("Directions request failed due to " + status);
+                        }
+                    }
+                );
+
+                rt.then((result) => {
+                    const routesList = document.querySelector('.info-section:last-child');
+                    showNotification('Route calculated successfully');
+                    console.log(result);
+                    for (let i = 0; i < result.routes.length; i++) {
+                        const route = result.routes[i];
+                        const routeItem = document.createElement('div');
+                        routeItem.className = 'info-item';
+                        routeItem.textContent = `Route ${i + 1}: ${route.summary}`;
+                        routesList.appendChild(routeItem);
+
+                        routeItem.onclick = () => {
+                            console.log(i);
+                            directionsRenderer.setRouteIndex(i);
+                        };
+                    }
+
+                    updateRoutePreferences();
+                });
+            });
+
+
             function calc_distance(lat, lng, p2) {
                 const radius = 6371e3;
                 const lat1 = lat * Math.PI / 180;
@@ -1182,6 +1255,8 @@
                 "9.988631396441125, 76.28596800755939": { name: "ERNAKULAM NORTH JUNCTION", id: 9 },
                 "9.985781719379675, 76.2815624795593": { name: "BANERJI RD JUNCTION", id: 10 },
                 "9.983773530935894, 76.27394860582694": { name: "HIGH COURT SIGNAL JUNCTION", id: 11 },
+                "9.564680546605889, 76.75485493747884": { name: "PONKUNNAM JUNCTION", id: 12 },
+                "9.382882887925652, 76.57505573122342": { name: "THIRUVALLA JUNCTION", id: 13 },
             };
 
             let popus = [];
