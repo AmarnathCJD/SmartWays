@@ -1048,12 +1048,14 @@
                 ],
             });
 
+            let mk = [];
+
             map.addListener("click", (event) => {
                 const m = new google.maps.Marker({
                     position: event.latLng,
                     map: map,
                     icon: {
-                        "url": "https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-driving-map-and-navigation-flaticons-lineal-color-flat-icons-6.png",
+                        "url": "https://img.icons8.com/external-flaticons-flat-flat-icons/64/external-destination-map-and-navigation-flaticons-flat-flat-icons-3.png",
                         "scale": 1,
                         "fillColor": "#ff3333",
                         "fillOpacity": 1,
@@ -1101,8 +1103,108 @@
                 rt.then((result) => {
                     const routesList = document.querySelector('.info-section:last-child');
                     showNotification('Route calculated successfully');
-                    console.log(result);
                     for (let i = 0; i < result.routes.length; i++) {
+                        const decodedPath = google.maps.geometry.encoding.decodePath(result.routes[i].overview_polyline);
+                        let doneJns = [];
+                        decodedPath.forEach((path) => {
+                            // iter through junctions and check if path is near to any junction
+                            Object.keys(junctions).forEach((junction) => {
+                                const distance = calc_distance(path.lat(), path.lng(), { lat: parseFloat(junction.split(",")[0]), lng: parseFloat(junction.split(",")[1]) });
+                                if (doneJns.includes(junction)) {
+                                    return;
+                                }
+                                if (distance < 0.5) {
+                                    doneJns.push(junction);
+                                    // get that jn from mk, delete it and insert a new one with red color
+                                    mk.forEach((m) => {
+                                        if (m.getPosition().lat() === parseFloat(junction.split(",")[0]) && m.getPosition().lng() === parseFloat(junction.split(",")[1])) {
+                                            m.setMap(null);
+                                            const mx = new google.maps.Marker({
+                                                position: { lat: parseFloat(junction.split(",")[0]), lng: parseFloat(junction.split(",")[1]) },
+                                                map: map,
+                                                icon: {
+                                                    "url": "https://img.icons8.com/external-flaticons-flat-flat-icons/32/external-intersection-map-and-navigation-flaticons-flat-flat-icons.png",
+                                                    "scale": 2,
+                                                    "fillColor": "#ff0000",
+                                                    "fillOpacity": 1,
+                                                },
+                                            });
+                                            const infoWindowStyle = `
+        <div class="custom-info-window">
+            <style>
+                .custom-info-window {
+                    background: rgba(26, 26, 26, 0.98);
+                    color: #ffffff;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    font-family: 'Inter', sans-serif;
+                    font-size: 14px;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                }
+                .gm-style .gm-style-iw-c {
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    padding: 0 !important;
+                    border-radius: 8px !important;
+                }
+                .gm-style .gm-style-iw-d {
+                    overflow: hidden !important;
+                    background: transparent !important;
+                }
+                .gm-style .gm-style-iw-t::after {
+                    display: none !important;
+                }
+                .gm-ui-hover-effect {
+                    background: rgba(26, 26, 26, 0.98) !important;
+                    border-radius: 50% !important;
+                    top: 4px !important;
+                    right: 4px !important;
+                    width: 24px !important; /* Increased size */
+                    height: 24px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                .gm-ui-hover-effect img {
+                    filter: invert(1) !important; /* Makes the close button white */
+                    opacity: 0.9 !important;
+                    width: 12px !important; /* Slightly larger */
+                    height: 12px !important;
+                }
+                .gm-ui-hover-effect:hover img {
+                    opacity: 1 !important;
+                }
+            </style>
+            <div>${junctions[junction].name}</div>
+            <div>${calc_distance(loc.lat, loc.lng, { lat: parseFloat(junction.split(",")[0]), lng: parseFloat(junction.split(",")[1]) }).toFixed(2)} km away</div>
+        </div>
+    `;
+                                            const infowindow = new google.maps.InfoWindow({
+                                                content: infoWindowStyle,
+                                                position: { lat: parseFloat(junction.split(",")[0]), lng: parseFloat(junction.split(",")[1]) },
+                                                pixelOffset: new google.maps.Size(0, -30),
+                                            });
+
+                                            popus.push(infowindow);
+
+                                            mx.addListener("click", () => {
+                                                popus.forEach((pop) => {
+                                                    pop.close();
+                                                });
+                                                infowindow.open(map, mx);
+                                            });
+
+
+                                            mk.push(mx);
+                                            return;
+                                        }
+                                    });
+
+                                }
+                            });
+                        });
                         const route = result.routes[i];
                         const routeItem = document.createElement('div');
                         routeItem.className = 'info-item';
@@ -1110,7 +1212,6 @@
                         routesList.appendChild(routeItem);
 
                         routeItem.onclick = () => {
-                            console.log(i);
                             directionsRenderer.setRouteIndex(i);
                         };
                     }
@@ -1257,6 +1358,8 @@
                         scaledSize: new google.maps.Size(48, 48),
                     },
                 });
+
+                mk.push(marker);
 
                 const infoWindowStyle = `
         <div class="custom-info-window">
