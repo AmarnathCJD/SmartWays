@@ -1100,6 +1100,10 @@
                     }
                 );
 
+                function randomInt(min, max) {
+                    return Math.floor(Math.random() * (max - min + 1) + min);
+                }
+
                 rt.then((result) => {
                     const routesList = document.querySelector('.info-section:last-child');
                     showNotification('Route calculated successfully');
@@ -1123,8 +1127,8 @@
                                                 position: { lat: parseFloat(junction.split(",")[0]), lng: parseFloat(junction.split(",")[1]) },
                                                 map: map,
                                                 icon: {
-                                                    "url": "https://img.icons8.com/external-flaticons-flat-flat-icons/32/external-intersection-map-and-navigation-flaticons-flat-flat-icons.png",
-                                                    "scale": 2,
+                                                    "url": "https://img.icons8.com/external-flatart-icons-lineal-color-flatarticons/64/external-directions-tourism-and-outdoor-recreation-flatart-icons-lineal-color-flatarticons-1.png",
+                                                    "scale": 0.4,
                                                     "fillColor": "#ff0000",
                                                     "fillOpacity": 1,
                                                 },
@@ -1179,6 +1183,25 @@
             </style>
             <div>${junctions[junction].name}</div>
             <div>${calc_distance(loc.lat, loc.lng, { lat: parseFloat(junction.split(",")[0]), lng: parseFloat(junction.split(",")[1]) }).toFixed(2)} km away</div>
+            <br>
+            <div>Vehicle Count: ${randomInt(10, 100)}</div>
+            <br>
+            <div class="info-item" style="display: flex; align-items: center; gap: 10px;">
+                    <span class="status green"></span>
+                    <span id="signal-1" style="flex: 1; text-align: left;">North: (45s)</span>
+                </div>
+                <div class="info-item" style="display: flex; align-items: center; gap: 10px;">
+                    <span class="status red"></span>
+                    <span id="signal-2" style="flex: 1; text-align: left;">South: (30s)</span>
+                </div>
+                <div class="info-item" style="display: flex; align-items: center; gap: 10px;">
+                    <span class="status yellow"></span>
+                    <span id="signal-3" style="flex: 1; text-align: left;">East: (5s)</span>
+                </div>
+                <div class="info-item" style="display: flex; align-items: center; gap: 10px;">
+                    <span class="status red"></span>
+                    <span id="signal-4" style="flex: 1; text-align: left;">West: (25s)</span>
+                </div>
         </div>
     `;
                                             const infowindow = new google.maps.InfoWindow({
@@ -1194,6 +1217,20 @@
                                                     pop.close();
                                                 });
                                                 infowindow.open(map, mx);
+
+                                                map.panTo(mx.getPosition());
+                                                fetch(`/api/jn?jid=${junctions[junction].id}`)
+                                                    .then((res) => res.json())
+                                                    .then((data) => {
+                                                        document.getElementById('jn-n').textContent = junctions[junction].name;
+                                                        const lat = parseFloat(junction.split(",")[0]);
+                                                        const lng = parseFloat(junction.split(",")[1]);
+                                                        document.getElementById('jn-d').textContent = calc_distance(lat, lng, loc).toFixed(2) + " km";
+                                                        document.getElementById('vn').textContent = data.vehicles.north;
+                                                        document.getElementById('vs').textContent = data.vehicles.south;
+                                                        document.getElementById('ve').textContent = data.vehicles.east;
+                                                        document.getElementById('vw').textContent = data.vehicles.west;
+                                                    })
                                             });
 
 
