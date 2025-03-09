@@ -5,7 +5,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from sklearn.model_selection import train_test_split
 
-df = pd.read_csv("vehicle_counts.csv")
+df = pd.read_csv("results/vehicle_counts.csv")
 
 scaler = MinMaxScaler()
 df["Vehicle Count"] = scaler.fit_transform(df[["Vehicle Count"]])

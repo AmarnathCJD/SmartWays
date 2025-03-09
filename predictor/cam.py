@@ -12,7 +12,7 @@ analyse = input("Analysis or Prediction? (a/p): ")
 
 if analyse == "p":
     print("\n🚦 Analysing the Video 🚦\n")
-    video_path = "vids/junction_vid.mp4"
+    video_path = "vids/jn-vid.mp4"
     cap = cv2.VideoCapture(video_path)
     model = YOLO("models/yolo11n.pt")
     # model.to("cuda")
@@ -186,10 +186,10 @@ if analyse == "p":
     cv2.destroyAllWindows()
 
     df = pd.DataFrame({"Time (s)": frame_times, "Vehicle Count": vehicle_counts})
-    df.to_csv("vehicle_counts.csv", index=False)
+    df.to_csv("results/vehicle_counts.csv", index=False)
 
 print("\n🚦 Traffic Analysis Report 🚦\n\n")
-df = pd.read_csv("vehicle_counts.csv")
+df = pd.read_csv("results/vehicle_counts.csv")
 plt.figure(figsize=(12, 6))
 sns.lineplot(
     x=df["Time (s)"], y=df["Vehicle Count"], marker="o", linestyle="-", color="b"
@@ -199,7 +199,7 @@ plt.title("Traffic Flow Over Time", fontsize=14)
 plt.xlabel("Time (seconds)", fontsize=12)
 plt.ylabel("Number of Vehicles", fontsize=12)
 plt.grid(True)
-plt.show()
+plt.savefig("results/traffic_analysis.png")
 
 mean_vehicles = df["Vehicle Count"].mean()
 max_vehicles = df["Vehicle Count"].max()

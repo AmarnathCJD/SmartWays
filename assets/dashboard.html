@@ -82,20 +82,6 @@
                 <h2>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                        <circle cx="12" cy="10" r="3" />
-                    </svg>
-                    Current Location
-                </h2>
-                <div class="info-item">
-                    <span id="current-loc">123 Main Street, City</span>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <h2>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
                         <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
                     </svg>
                     Nearest Junction
@@ -1076,7 +1062,6 @@
 
                 const lat = event.latLng.lat();
                 const lng = event.latLng.lng();
-                document.getElementById('current-loc').textContent = `${lat}, ${lng}`;
 
                 const nearestJunction = Object.keys(junctions).reduce((nearest, junction) => {
                     const distance = Math.sqrt(Math.pow(lat - parseFloat(junction.split(",")[0]), 2) + Math.pow(lng - parseFloat(junction.split(",")[1]), 2));
@@ -1171,8 +1156,6 @@
                                 strokeColor: "#ffffff",
                             },
                         });
-
-                        document.getElementById('current-loc').textContent = `${pos.lat}, ${pos.lng}`;
 
                         const nearestJunction = Object.keys(junctions).reduce((nearest, junction) => {
                             const distance = Math.sqrt(Math.pow(pos.lat - parseFloat(junction.split(",")[0]), 2) + Math.pow(pos.lng - parseFloat(junction.split(",")[1]), 2));
