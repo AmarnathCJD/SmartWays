@@ -27,7 +27,7 @@ func TokenCheck(next http.Handler) http.Handler {
 
 		user, err := a.VerifyToken(token)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
